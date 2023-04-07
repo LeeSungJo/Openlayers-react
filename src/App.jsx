@@ -40,11 +40,6 @@ function App() {
 
   return (
     <div className="App">
-      <div className="app-label">
-        <p>React Functional Components with OpenLayers Example</p>
-        <p>Click the map to reveal location coordinate via React State</p>
-      </div>
-
       {/* <MapWrapper features={features} /> */}
       <MapWrapper />
     </div>
