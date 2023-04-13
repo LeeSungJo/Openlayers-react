@@ -96,11 +96,11 @@ function MapWrapper() {
     // select interaction working on "singleclick"
     const selectSingleClick = new Select({ style: selectStyle });
 
-    // select interaction working on "click"
-    const selectClick = new Select({
-      condition: click,
-      style: selectStyle,
-    });
+    // // select interaction working on "click"
+    // const selectClick = new Select({
+    //   condition: click,
+    //   style: selectStyle,
+    // });
 
     // select interaction working on "pointermove"
     const selectPointerMove = new Select({
@@ -108,41 +108,21 @@ function MapWrapper() {
       style: selectStyle,
     });
 
-    const selectAltClick = new Select({
-      style: selectStyle,
-      condition: function (mapBrowserEvent) {
-        return click(mapBrowserEvent) && altKeyOnly(mapBrowserEvent);
-      },
-    });
-
-    // const selectElement = document.getElementById("type");
-
-    // const changeInteraction = function () {
-    //   if (select !== null) {
-    //     map.removeInteraction(select);
-    //   }
-    //   const value = selectElement.value;
-
-    // select = selectSingleClick;
-
-    // if (value == "singleclick") {
-    //   select = selectSingleClick;
-    // } else if (value == "click") {
-    //   select = selectClick;
-    // } else if (value == "pointermove") {
-    //   select = selectPointerMove;
-    // } else if (value == "altclick") {
-    //   select = selectAltClick;
-    // } else {
-    //   select = null;
-    // }
+    // const selectAltClick = new Select({
+    //   style: selectStyle,
+    //   condition: function (mapBrowserEvent) {
+    //     return click(mapBrowserEvent) && altKeyOnly(mapBrowserEvent);
+    //   },
+    // });
+    // console.log(selectPointerMove);
+    // console.log("랜더링?");
     if (selectSingleClick === null) {
       map.removeInteraction(selectSingleClick);
     } else {
       map.addInteraction(selectSingleClick);
-      selectSingleClick.on("select", function (e) {
-        console.log(e.selected[0].values_);
-        console.log(e.selected[0].values_.SIG_KOR_NM);
+      selectSingleClick.on("selectSingleClick", function (e) {
+        // console.log(e.selected[0].values_);
+        // console.log(e.selected[0].values_.SIG_KOR_NM);
         document.getElementById("status").innerHTML =
           "&nbsp;" +
           // e.target.getFeatures().getLength() +
@@ -150,188 +130,33 @@ function MapWrapper() {
       });
     }
 
-    // if (selectSingleClick !== null) {
-    //   map.addInteraction(selectSingleClick);
-    //   selectSingleClick.on("select", function (e) {
-    //     console.log(e.selected[0].values_);
-    //     console.log(e.selected[0].values_.SIG_KOR_NM);
-    //     document.getElementById("status").innerHTML =
-    //       "&nbsp;" +
-    //       // e.target.getFeatures().getLength() +
-    //       e.selected[0].values_.SIG_KOR_NM;
-    //   });
-    // }
+    map.addInteraction(selectSingleClick);
+    selectSingleClick.on("selectSingleClick", function (e) {
+      // console.log(e.selected[0].values_);
+      // console.log(e.selected[0].values_.SIG_KOR_NM);
+      console.log(e);
+      // document.getElementById("status").innerHTML =
+      //   "&nbsp;" +
+      //   // e.target.getFeatures().getLength() +
+      //   e.selected[0].values_.SIG_KOR_NM;
+    });
 
+    // console.log(selectPointerMove);
     if (selectPointerMove === null) {
       map.removeInteraction(selectPointerMove);
     } else {
       map.addInteraction(selectPointerMove);
       selectPointerMove.on("select", function (e) {
-        console.log(e.selected[0].values_);
-        console.log(e.selected[0].values_.SIG_KOR_NM);
-        document.getElementById("status").innerHTML =
-          "&nbsp;" +
-          // e.target.getFeatures().getLength() +
-          e.selected[0].values_.SIG_KOR_NM;
+        if (e.selected.length) {
+          document.getElementById("status").innerHTML =
+            "&nbsp;" +
+            // e.target.getFeatures().getLength() +
+            e.selected[0].values_.SIG_KOR_NM;
+          // console.log(e.selected[0].values_);
+          // console.log(e.selected[0].values_.SIG_KOR_NM);
+        }
       });
     }
-
-    // if (selectPointerMove !== null) {
-    //   map.addInteraction(selectPointerMove);
-    //   selectPointerMove.on("select", function (e) {
-    //     console.log(e.selected[0].values_);
-    //     console.log(e.selected[0].values_.SIG_KOR_NM);
-    //     document.getElementById("status").innerHTML =
-    //       "&nbsp;" +
-    //       // e.target.getFeatures().getLength() +
-    //       e.selected[0].values_.SIG_KOR_NM;
-    //   });
-    // }
-
-    // if (select !== null) {
-    //   map.addInteraction(select);
-    //   select.on("select", function (e) {
-    //     console.log(e.selected[0].values_);
-    //     console.log(e.selected[0].values_.SIG_KOR_NM);
-    //     document.getElementById("status").innerHTML =
-    //       "&nbsp;" +
-    //       // e.target.getFeatures().getLength() +
-    //       e.selected[0].values_.SIG_KOR_NM;
-    //   });
-    // }
-
-    // };
-
-    // ------------------------------------------------------------------------
-    // // hover시 스타일 지정
-    // const selectStyle = new Style({
-    //   fill: new Fill({
-    //     color: "#eeeeee",
-    //   }),
-    //   stroke: new Stroke({
-    //     color: "rgba(255, 255, 255, 0.7)",
-    //     width: 2,
-    //   }),
-    // });
-
-    // const status = document.getElementById("status");
-
-    // let selected = null;
-    // map.on("pointermove", function (e) {
-    //   console.log(e.target.value_);
-    //   if (selected !== null) {
-    //     selected.setStyle(undefined);
-    //     selected = null;
-    //   }
-
-    //   map.forEachFeatureAtPixel(e.pixel, function (f) {
-    //     selected = f;
-    //     selectStyle.getFill().setColor(f.get("COLOR") || "#1e57b3");
-    //     f.setStyle(selectStyle);
-    //     return true;
-    //   });
-
-    //   if (selected) {
-    //     status.innerHTML = selected.get("SIG_KOR_NM");
-    //   } else {
-    //     status.innerHTML = "&nbsp;";
-    //   }
-    // });
-    // ----------------------------------------------------------------------------
-    // const highlightStyle = new Style({
-    //   stroke: new Stroke({
-    //     color: "rgba(255, 255, 255, 0.7)",
-    //     width: 2,
-    //   }),
-    // });
-
-    // const featureOverlay = new VectorLayer({
-    //   source: new VectorSource(),
-    //   map: map,
-    //   style: highlightStyle,
-    // });
-
-    // // 오픈레이어스 hover 예시
-    // const selectStyle = new Style({
-    //   fill: new Fill({
-    //     color: "#eeeeee",
-    //   }),
-    //   stroke: new Stroke({
-    //     color: "rgba(255, 255, 255, 0.7)",
-    //     width: 2,
-    //   }),
-    // });
-
-    // let highlight;
-    // const displayFeatureInfo = function (pixel) {
-    //   vectorLayer.getFeatures(pixel).then(function (features) {
-    //     // console.log(features[0].values_);
-    //     const feature = features.length ? features[0].values_ : undefined;
-
-    //     // const info = document.getElementById("info");
-    //     // if (features.length) {
-    //     //   info.innerHTML =
-    //     //     feature.get("ECO_NAME") + ": " + feature.get("NNH_NAME");
-    //     // } else {
-    //     //   info.innerHTML = "&nbsp;";
-
-    //     const status = document.getElementById("status");
-
-    //     let selected = null;
-    //     map.on("pointermove", function (e) {
-    //       if (selected !== null) {
-    //         selected.setStyle(undefined);
-    //         selected = null;
-    //       }
-
-    //       map.forEachFeatureAtPixel(e.pixel, function (f) {
-    //         selected = f;
-    //         selectStyle.getFill().setColor(f.get("COLOR") || "#4287f5");
-    //         f.setStyle(selectStyle);
-    //         return true;
-    //       });
-
-    //       if (selected) {
-    //         status.innerHTML = selected.get("SIG_KOR_NM");
-    //       } else {
-    //         status.innerHTML = "&nbsp;";
-    //       }
-    //     });
-    //     if (feature !== highlight) {
-    //       if (highlight) {
-    //         featureOverlay.getSource().removeFeature(highlight);
-    //       }
-    //       if (feature) {
-    //         featureOverlay.getSource().addFeature(feature);
-    //       }
-    //       highlight = feature;
-    //     }
-    //   });
-    // };
-
-    // // 마우스 hover시 반응
-    // map.on("pointermove", function (evt) {
-    //   console.log(evt);
-    //   if (evt.dragging) {
-    //     return;
-    //   }
-    //   const pixel = map.getEventPixel(evt.originalEvent);
-    //   displayFeatureInfo(pixel);
-    // });
-
-    // // 마우스 hover시 반응
-    // map.on("pointermove", function (evt) {
-    //   if (evt.dragging) {
-    //     return;
-    //   }
-    //   const pixel = map.getEventPixel(evt.originalEvent);
-    //   displayFeatureInfo(pixel);
-    // });
-
-    // // 마우스 클릭시 반응
-    // map.on("click", function (evt) {
-    //   displayFeatureInfo(evt.pixel);
-    // });
 
     // save map and vector layer references to state
     setMap(map);
