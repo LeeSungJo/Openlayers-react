@@ -6,27 +6,29 @@ import "./MapWrapper.css";
 
 // openlayers
 import { Map, View, Overlay } from "ol";
-// import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-// import { transform } from "ol/proj";
-// import { toStringXY } from "ol/coordinate";
-
 import OSM from "ol/source/OSM.js";
 import { fromLonLat, get as getProjection, toLonLat, transform } from "ol/proj";
 import { Style, Fill, Stroke } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON.js";
-// import { toLonLat } from "ol/proj.js";
 import Select from "ol/interaction/Select.js";
 import { altKeyOnly, click, pointerMove } from "ol/events/condition.js";
+import Feature from "ol/Feature.js";
+// import arc from "arc.js";
+
+// Arc 필요
+import LineString from "ol/geom/LineString.js";
 
 // 경북 map
-import gbMap from "../assets/sig_wsg84_gb_geo.geojson";
+// import gbMap from "../assets/sig_wsg84_gb_geo.geojson";
+import gbMap from "../assets/sig_wsg84_gb_geo_arc.geojson";
 
 function MapWrapper() {
   // set intial state
   const [map, setMap] = useState();
+  const arc = require("arc"); // npm install --save arc
 
   // pull refs
   const mapElement = useRef();
@@ -38,7 +40,7 @@ function MapWrapper() {
   const osmLayer = new TileLayer({ source: new OSM() });
 
   // 경북 map Layer - line color
-  const style = new Style({
+  const styleMap = new Style({
     fill: new Fill({
       color: "#47de77",
     }),
