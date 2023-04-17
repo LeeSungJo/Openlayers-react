@@ -24,10 +24,13 @@ import LineString from "ol/geom/LineString.js";
 // 경북 map
 // import gbMap from "../assets/sig_wsg84_gb_geo.geojson";
 import gbMap from "../assets/sig_wsg84_gb_geo_arc.geojson";
+import centroidData from "../assets/centroid_gb.json";
 
 function MapWrapper() {
   // set intial state
   const [map, setMap] = useState();
+  const [selectedRegion, selectRegion] = useState(null);
+
   const arc = require("arc"); // npm install --save arc
 
   // pull refs
@@ -52,12 +55,56 @@ function MapWrapper() {
       url: gbMap,
       format: new GeoJSON(),
     }),
+    autoHighlighte: true,
+    onClick: ({ object }) => {
+      selectRegion(object);
+    },
     // background: "white",
     // style: function (feature) {
     //   const color = feature.get("COLOR") || "#d9dcfc";
     //   style.getFill().setColor(color);
     //   return style;
     // },
+  });
+
+  console.log(centroidData.features[0].properties.SIG_CD);
+  console.log(selectedRegion);
+
+  const flightsSource = new VectorSource({
+    loader: function () {
+      const flightsData = centroidData.features;
+      for (let i = 0; i < flightsData.length; i++) {
+        const flight = flightsData[i];
+        const from = flight[0];
+        const to = flight[1];
+
+        // create an arc circle between the two locations
+        const arcGenerator = new arc.GreatCircle(
+          { x: from[1], y: from[0] },
+          { x: to[1], y: to[0] }
+        );
+
+        const arcLine = arcGenerator.Arc(100, { offset: 10 });
+        // paths which cross the -180°/+180° meridian are split
+        // into two sections which will be animated sequentially
+        const features = [];
+        arcLine.geometries.forEach(function (geometry) {
+          const line = new LineString(geometry.coords);
+          line.transform("EPSG:4326", "EPSG:3857");
+
+          features.push(
+            new Feature({
+              geometry: line,
+              finished: false,
+            })
+          );
+        });
+        // add the features with a delay so that the animation
+        // for all features does not start at the same time
+        map.addLater(features, i * 50);
+      }
+      // TileLayer.on('postrender', animateFlights);
+    },
   });
 
   useEffect(() => {
@@ -118,29 +165,38 @@ function MapWrapper() {
     // });
     // console.log(selectPointerMove);
     // console.log("랜더링?");
-    if (selectSingleClick === null) {
-      map.removeInteraction(selectSingleClick);
-    } else {
-      map.addInteraction(selectSingleClick);
-      selectSingleClick.on("selectSingleClick", function (e) {
-        // console.log(e.selected[0].values_);
-        // console.log(e.selected[0].values_.SIG_KOR_NM);
+    // if (selectSingleClick === null) {
+    //   map.removeInteraction(selectSingleClick);
+    // } else {
+    //   map.addInteraction(selectSingleClick);
+    //   selectSingleClick.on("select", function (e) {
+    //     // selectRegion(e.selected[0]);
+    //     console.log(e);
+
+    //     // console.log(selectedRegion);
+    //     // console.log(e.selected[0].values_);
+    //     // console.log(e.selected[0].values_.SIG_KOR_NM);
+    //     document.getElementById("status").innerHTML =
+    //       "&nbsp;" +
+    //       // e.target.getFeatures().getLength() +
+    //       e.selected[0].values_.SIG_KOR_NM;
+    //   });
+    // }
+    // console.log(selectedRegion);
+
+    // 클릭시 event
+    map.addInteraction(selectSingleClick);
+    // selectSingleClick.on("selectSingleClick", function (e) {
+    selectSingleClick.on("select", function (e) {
+      if (e.selected.length > 0) {
+        console.log(e.selected[0].values_);
         document.getElementById("status").innerHTML =
           "&nbsp;" +
           // e.target.getFeatures().getLength() +
           e.selected[0].values_.SIG_KOR_NM;
-      });
-    }
-
-    map.addInteraction(selectSingleClick);
-    selectSingleClick.on("selectSingleClick", function (e) {
+      }
       // console.log(e.selected[0].values_);
       // console.log(e.selected[0].values_.SIG_KOR_NM);
-      console.log(e);
-      // document.getElementById("status").innerHTML =
-      //   "&nbsp;" +
-      //   // e.target.getFeatures().getLength() +
-      //   e.selected[0].values_.SIG_KOR_NM;
     });
 
     // console.log(selectPointerMove);
@@ -149,17 +205,19 @@ function MapWrapper() {
     } else {
       map.addInteraction(selectPointerMove);
       selectPointerMove.on("select", function (e) {
-        if (e.selected.length) {
-          document.getElementById("status").innerHTML =
-            "&nbsp;" +
-            // e.target.getFeatures().getLength() +
-            e.selected[0].values_.SIG_KOR_NM;
-          // console.log(e.selected[0].values_);
-          // console.log(e.selected[0].values_.SIG_KOR_NM);
-        }
+        // 여기에 hover시 팝업 기능 넣으면 될 것 같음
+        // Div하나 만들어서 클릭 위치 바로 위에 생성 후 hover 풀리면 바로 삭제
+        // if (e.selected.length) {
+        //   document.getElementById("status").innerHTML =
+        //     "&nbsp;" +
+        //     // e.target.getFeatures().getLength() +
+        //     e.selected[0].values_.SIG_KOR_NM;
+        //   // console.log(e.selected[0].values_);
+        //   // console.log(e.selected[0].values_.SIG_KOR_NM);
+        // }
       });
     }
-
+    // console.log(selectedRegion);
     // save map and vector layer references to state
     setMap(map);
   }, []);
