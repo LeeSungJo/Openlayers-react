@@ -1,5 +1,5 @@
 // react
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 
 // CSS
 import "./MapWrapper.css";
@@ -35,7 +35,6 @@ function MapWrapper() {
 
   // pull refs
   const mapElement = useRef();
-  // const status = useRef;
 
   // initialize map on first render - logic formerly put into componentDidMount
 
@@ -67,52 +66,108 @@ function MapWrapper() {
     // },
   });
 
-  console.log(centroidData.features[0].properties.SIG_CD);
-  console.log(selectedRegion);
+  var arcStyle = new Style({
+    stroke: new Stroke({
+      color: "rgba( 41, 129, 63 ,0.7)",
+      width: 2,
+    }),
+  });
 
-  const flightsSource = new VectorSource({
-    loader: function () {
-      const flightsData = centroidData.features;
-      for (let i = 0; i < flightsData.length; i++) {
-        const flight = flightsData[i];
-        const from = flight[0];
-        const to = flight[1];
-
-        // create an arc circle between the two locations
-        const arcGenerator = new arc.GreatCircle(
-          { x: from[1], y: from[0] },
-          { x: to[1], y: to[0] }
-        );
-
-        const arcLine = arcGenerator.Arc(100, { offset: 10 });
-        // paths which cross the -180°/+180° meridian are split
-        // into two sections which will be animated sequentially
-        const features = [];
-        arcLine.geometries.forEach(function (geometry) {
-          const line = new LineString(geometry.coords);
-          line.transform("EPSG:4326", "EPSG:3857");
-
-          features.push(
-            new Feature({
-              geometry: line,
-              finished: false,
-            })
-          );
-        });
-        // add the features with a delay so that the animation
-        // for all features does not start at the same time
-        map.addLater(features, i * 50);
-      }
-      // TileLayer.on('postrender', animateFlights);
+  var arcSource = new VectorSource();
+  var arcLayer = new VectorLayer({
+    source: arcSource,
+    style: function (feature) {
+      //스타일을 줘버리면 첨부터 그려진상태로 진행된다.
+      return arcStyle; //디버그 의미로 한번 줘 보자
     },
   });
+
+  function makeArcLine(selectedRegion) {
+    let arcData = selectedRegion;
+    console.log(arcData);
+    if (arcData === null) {
+      console.log("null이라고 하네용");
+    } else {
+      // let arcData = selectedRegion;
+      console.log(arcData);
+      const from = arcData.centroid;
+      arcData.target.forEach((target, i) => {
+        const SIG_CD_Code = centroidData.features.find(
+          (obj) => parseInt(obj.SIG_CD) === arcData.target[i]
+        );
+        console.log(SIG_CD_Code);
+      });
+    }
+
+    // flights.forEach((flight, i) => {
+    //   var from = flight[0];
+    //   var to = flight[1];
+    //   var arcGenerator = new arc.GreatCircle( //이건 구조체를 그리는데 도움을 주는 라이브러리 이다.
+    //     { x: from[0], y: from[1] },
+    //     { x: to[0], y: to[1] }
+    //   );
+    //   var arcLine = arcGenerator.Arc(100, { offset: 50 }); //라인이 그려진다.
+    //   if (arcLine.geometries.length === 1) {
+    //     var line = new LineString(arcLine.geometries[0].coords); //LineString 객체를 통해 맵에서 사용 가능한 형태로 조립하고
+    //     line.transform("EPSG:4326", "EPSG:3857");
+    //     var feature = new Feature({
+    //       //구조물을 만들어
+    //       geometry: line,
+    //     });
+    //     feature.set("startTime", new Date().getTime()); //해당 값은 이벤트의 시작 종료를 위해 필요 하다.
+    //     feature.set("myIndex", i);
+    //     flightsSource.addFeature(feature); //벡터레이어가 참조하는 백터소스에 추가하여준다.
+    //   }
+    // });
+  }
+
+  makeArcLine(selectedRegion);
+
+  // const arcSource = new VectorSource({
+  //   loader: function () {
+  //     if (selectedRegion !== null) {
+  //       const arcData = selectedRegion;
+  //       for (let i = 0; i < arcData.target.length; i++) {
+  //         const from = arcData.centroid;
+  //         const to = centroidData.features.find(
+  //           (obj) => parseInt(obj.SIG_CD) === arcData.target[i]
+  //         );
+  //         console.log(from);
+  //         console.log(to);
+
+  //         const arcGenerator = new arc.GreatCircle(
+  //           { x: from[1], y: from[0] },
+  //           { x: to[1], y: to[0] }
+  //         );
+  //         const arcLine = arcGenerator.Arc(100, { offset: 10 });
+  //         // paths which cross the -180°/+180° meridian are split
+  //         // into two sections which will be animated sequentially
+  //         const features = [];
+  //         arcLine.geometries.forEach(function (geometry) {
+  //           const line = new LineString(geometry.coords);
+  //           line.transform("EPSG:4326", "EPSG:3857");
+
+  //           features.push(
+  //             new Feature({
+  //               geometry: line,
+  //               finished: false,
+  //             })
+  //           );
+  //           map.addLater(features, i * 50);
+  //         });
+  //       }
+  //     }
+  //   },
+  // });
+
+  // console.log(selectedRegion);
 
   useEffect(() => {
     // create map
     const map = new Map({
       target: mapElement.current,
       // target: "map-wrapper",
-      layers: [osmLayer, vectorLayer],
+      layers: [osmLayer, vectorLayer, arcLayer],
       view: new View({
         projection: "EPSG:3857",
         center: fromLonLat(
@@ -157,39 +212,13 @@ function MapWrapper() {
       style: selectStyle,
     });
 
-    // const selectAltClick = new Select({
-    //   style: selectStyle,
-    //   condition: function (mapBrowserEvent) {
-    //     return click(mapBrowserEvent) && altKeyOnly(mapBrowserEvent);
-    //   },
-    // });
-    // console.log(selectPointerMove);
-    // console.log("랜더링?");
-    // if (selectSingleClick === null) {
-    //   map.removeInteraction(selectSingleClick);
-    // } else {
-    //   map.addInteraction(selectSingleClick);
-    //   selectSingleClick.on("select", function (e) {
-    //     // selectRegion(e.selected[0]);
-    //     console.log(e);
-
-    //     // console.log(selectedRegion);
-    //     // console.log(e.selected[0].values_);
-    //     // console.log(e.selected[0].values_.SIG_KOR_NM);
-    //     document.getElementById("status").innerHTML =
-    //       "&nbsp;" +
-    //       // e.target.getFeatures().getLength() +
-    //       e.selected[0].values_.SIG_KOR_NM;
-    //   });
-    // }
-    // console.log(selectedRegion);
-
     // 클릭시 event
     map.addInteraction(selectSingleClick);
-    // selectSingleClick.on("selectSingleClick", function (e) {
     selectSingleClick.on("select", function (e) {
-      if (e.selected.length > 0) {
-        console.log(e.selected[0].values_);
+      if (e.selected.length === 0) {
+        selectRegion(null);
+      } else {
+        selectRegion(e.selected[0].values_);
         document.getElementById("status").innerHTML =
           "&nbsp;" +
           // e.target.getFeatures().getLength() +
@@ -199,6 +228,7 @@ function MapWrapper() {
       // console.log(e.selected[0].values_.SIG_KOR_NM);
     });
 
+    // console.log(selectedRegion);
     // console.log(selectPointerMove);
     if (selectPointerMove === null) {
       map.removeInteraction(selectPointerMove);
