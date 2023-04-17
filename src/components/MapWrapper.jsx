@@ -89,14 +89,20 @@ function MapWrapper() {
       console.log("null이라고 하네용");
     } else {
       // let arcData = selectedRegion;
-      console.log(arcData);
+      console.log(arcData.target);
       const from = arcData.centroid;
-      arcData.target.forEach((target, i) => {
-        const SIG_CD_Code = centroidData.features.find(
-          (obj) => parseInt(obj.SIG_CD) === arcData.target[i]
-        );
-        console.log(SIG_CD_Code);
-      });
+
+      for (const i in arcData.target) {
+        console.log(arcData.target[i]);
+      }
+      // arcData.target.forEach((target, i) => {
+      //   console.log("target", target);
+      //   console.log("i", i);
+      //   // const SIG_CD_Code = centroidData.features.find(
+      //   //   (obj) => parseInt(obj.SIG_CD) === arcData.target[i]
+      //   // );
+      //   // console.log(SIG_CD_Code);
+      // });
     }
 
     // flights.forEach((flight, i) => {
