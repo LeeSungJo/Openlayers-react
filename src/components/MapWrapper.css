@@ -1,5 +1,5 @@
 .ol-popup {
-  position: absolute;
+  /* position: absolute; */
   background-color: white;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   padding: 15px;
@@ -8,6 +8,7 @@
   bottom: 12px;
   left: -50px;
   min-width: 280px;
+  z-index: 10;
 }
 .ol-popup:after,
 .ol-popup:before {
